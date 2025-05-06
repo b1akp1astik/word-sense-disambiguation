@@ -172,5 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+<<<<<<< HEAD
 
 *.joblib
+=======
+>>>>>>> 4971321bc33c810afece7fc2f7924712386cfaae
