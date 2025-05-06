@@ -1,0 +1,84 @@
+---
+title: "CS 5322 Program 3 Report"
+author: "Harley Gribble"
+format: pdf
+---
+
+# Overview
+
+This project implements a supervised word sense disambiguation (WSD) system for three target words: **camper**, **conviction**, and **deed**. For each word, two senses are defined and example-labeled training data was created (100 examples per sense). The goal is to build models that predict the correct sense (1 or 2) for a new sentence containing the target word.
+
+# Approach
+
+## Data Preparation
+
+- Manually curated 100 example sentences for each sense of each word using realistic context.
+- Ensured sentence diversity through paraphrasing, lexical variation, and sentence structure.
+- Each dataset is stored as a plain text file in the format:
+
+```
+word (POS)
+1: definition for sense 1
+2: definition for sense 2
+1 sentence using sense 1
+...
+2 sentence using sense 2
+...
+```
+
+## Preprocessing & Feature Engineering
+
+### For `camper` and `conviction`:
+- Used **SBERT embeddings** (`all-MiniLM-L6-v2`) to convert sentences into dense vector representations.
+- No additional preprocessing needed aside from whitespace stripping and encoding.
+
+### For `deed`:
+- Constructed a custom pipeline with:
+  - `LemmaTransformer`: custom transformer to normalize tokens.
+  - `GlossSimilarity`: matches tokens against WordNet glosses using cosine similarity.
+  - Contextual features: extracted surrounding words and similarity scores.
+  - All transformers are combined using `FeatureUnion`.
+
+# Classification Algorithms
+
+- **Camper & Conviction**: Multi-Layer Perceptron (MLPClassifier from scikit-learn) trained on SBERT embeddings.
+- **Deed**: Stacked classifier combining:
+  - Logistic Regression
+  - Random Forest
+- Cross-validation and grid search used during development for validation, though final training used full data.
+
+# WSD Prediction and Disambiguation
+
+Each word has a `WSD_Test_*` function in `cs5322s25.py` that:
+- Accepts a list of sentences.
+- Loads the appropriate model from disk.
+- Transforms input text using SBERT or custom pipeline.
+- Outputs a list of integer sense labels: **1** or **2**, preserving order.
+
+# Evaluation Results
+
+Tested models on balanced sets of unseen test sentences (50% per sense):
+
+| Word       | Accuracy Range | Notes |
+|------------|----------------|-------|
+| **camper**     | 80%–100%        | Reliable across test variations |
+| **conviction** | 60%–100%        | Lower on ambiguous, high on clear |
+| **deed**       | 90%–100%        | Robust across all test sets |
+
+# Final Testing Procedure
+
+The file `cs5322s25.py` includes the function `run_test("Harley", "Gribble")` which:
+- Loads each file matching `<word>_test.txt`
+- Calls the relevant `WSD_Test_*` function
+- Writes to `result_<word>_harleygribble.txt` with one label per line
+
+### Example Command
+
+```bash
+python cs5322s25.py
+```
+
+# Conclusion
+
+This system demonstrates strong supervised disambiguation performance. SBERT and symbolic features each have strengths for different target words. With clearly unambiguous inputs, the system performs at a high level and satisfies project goals.
+
