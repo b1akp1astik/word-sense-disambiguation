@@ -175,5 +175,7 @@ cython_debug/
 <<<<<<< HEAD
 
 *.joblib
+
+*.Rhistory
 =======
 >>>>>>> 4971321bc33c810afece7fc2f7924712386cfaae
